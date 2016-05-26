@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from string import letters, digits
 
+global tokenTable
+
 class CuteType:
     INT=1
     ID=4
@@ -506,6 +508,11 @@ class CuteInterpreter(object):
                 [TokenType.PLUS, TokenType.MINUS, TokenType.TIMES, TokenType.DIV,\
                  TokenType.GT, TokenType.LT, TokenType.EQ]:
             return self.run_arith(op_code)
+        
+        elif op_code.type is TokenType.DEFINE:
+            value = self.run_expr(op_code.next.next)
+            var = op_code.next
+            return self.insertTable(var,value)
 
         else:
             print "application: not a procedure;"
@@ -593,6 +600,9 @@ def Test_method(input):
         print "... {0}".format(print_node(result))
 
 def Test_All():
+    global tokenTable
+    tokenTable = {}
+
     while True:
         input = raw_input("> ")
         Test_method(input)
