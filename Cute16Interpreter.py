@@ -322,16 +322,21 @@ class CuteInterpreter(object):
     FALSE_NODE = Node(TokenType.FALSE)
 
     def run_arith(self, arith_node):
-        #작성 - 산술/관계 연산
+        #�옉�꽦 - �궛�닠/愿�怨� �뿰�궛
 
         rhs1 = arith_node.next
         rhs2 = rhs1.next
 
+        
         if rhs1.type is TokenType.LIST:
             rhs1 = self.run_arith(rhs1.value)
         if rhs2.type is TokenType.LIST:
             rhs2 = self.run_arith(rhs2.value)
-
+        if self.lookupTable(rhs1) is not None :
+            rhs1 = self.lookupTable(rhs1)
+        if self.lookupTable(rhs2) is not None :
+            rhs2 = self.lookupTable(rhs2) 
+        
         if arith_node.type is TokenType.PLUS :
             return Node(TokenType.INT, int(rhs1.value) + int(rhs2.value))
         elif arith_node.type is TokenType.MINUS :
@@ -354,13 +359,18 @@ class CuteInterpreter(object):
     def run_func(self, func_node):
         rhs1 = func_node.next
         rhs2 = rhs1.next if rhs1.next is not None else None
-
+        
+        if self.lookupTable(rhs1) is not None :
+            rhs1 = self.lookupTable(rhs1)
+        if self.lookupTable(rhs2) is not None :
+            rhs2 = self.lookupTable(rhs2) 
+            
         def create_quote_node(node, list_flag = False):
             """
-            "Quote 노드를 생성한 뒤, node를 next로 하여 반환"
-            "list_flag가 True일 경우, list node를 생성한 뒤, list의 value를 입력받은 node로 연결하고"
-            "Quote의 next를 여기서 생상한 list로 연결함"
-            "최종 리턴은 여기서 생성한 quote노드를 value로 갖는 List"
+            "Quote �끂�뱶瑜� �깮�꽦�븳 �뮘, node瑜� next濡� �븯�뿬 諛섑솚"
+            "list_flag媛� True�씪 寃쎌슦, list node瑜� �깮�꽦�븳 �뮘, list�쓽 value瑜� �엯�젰諛쏆� node濡� �뿰寃고븯怨�"
+            "Quote�쓽 next瑜� �뿬湲곗꽌 �깮�긽�븳 list濡� �뿰寃고븿"
+            "理쒖쥌 由ы꽩�� �뿬湲곗꽌 �깮�꽦�븳 quote�끂�뱶瑜� value濡� 媛뽯뒗 List"
             """
             q_node = Node(TokenType.QUOTE)
             if list_flag:
@@ -372,7 +382,7 @@ class CuteInterpreter(object):
             return l_node
 
         def is_quote_list(node):
-            "Quote의 next가 list인지 확인"
+            "Quote�쓽 next媛� list�씤吏� �솗�씤"
             if node.type is TokenType.LIST:
                 if node.value.type is TokenType.QUOTE:
                     if node.value.next.type is TokenType.LIST:
@@ -380,13 +390,13 @@ class CuteInterpreter(object):
             return False
 
         def pop_node_from_quote_list(node):
-            "Quote list에서 quote에 연결되어 있는 list노드의 value를 꺼내줌"
+            "Quote list�뿉�꽌 quote�뿉 �뿰寃곕릺�뼱 �엳�뒗 list�끂�뱶�쓽 value瑜� 爰쇰궡以�"
             if not is_quote_list(node):
                 return node
             return node.value.next.value
 
         def list_is_null(node):
-            "입력받은 node가 null list인지 확인함"
+            "�엯�젰諛쏆� node媛� null list�씤吏� �솗�씤�븿"
             node = pop_node_from_quote_list(node)
             if node is None:return True
             return False
@@ -401,7 +411,7 @@ class CuteInterpreter(object):
             return create_quote_node(result)
 
         elif func_node.type is TokenType.CDR:
-            #작성 - cdr : Return except first element of List
+            #�옉�꽦 - cdr : Return except first element of List
             rhs1 = self.run_expr(rhs1)
             if not is_quote_list(rhs1):
                 print ("cdr error!")
@@ -411,8 +421,8 @@ class CuteInterpreter(object):
         elif func_node.type is TokenType.CONS:
             expr_rhs1 = self.run_expr(rhs1)
             expr_rhs2 = self.run_expr(rhs2)
-            #작성 - cons : add to list an element
-            #rhs2는 무조건 list라고 가정
+            #�옉�꽦 - cons : add to list an element
+            #rhs2�뒗 臾댁“嫄� list�씪怨� 媛��젙
 
             if expr_rhs1 is None:
                 print ("There isn't Head")
@@ -435,7 +445,7 @@ class CuteInterpreter(object):
             return self.FALSE_NODE
 
         elif func_node.type is TokenType.EQ_Q:
-            #작성 - eq? : compare and return T/F
+            #�옉�꽦 - eq? : compare and return T/F
             if rhs1.type and rhs2.type is TokenType.INT:
                 if rhs1.value == rhs2.value:
                     return self.TRUE_NODE
@@ -446,14 +456,14 @@ class CuteInterpreter(object):
             return self.FALSE_NODE
 
         elif func_node.type is TokenType.NOT:
-            #작성 - Not : True -> False / False -> True
+            #�옉�꽦 - Not : True -> False / False -> True
             if rhs1.type is TokenType.True:
                 return Node(TokenType.FALSE)
             else:
                 return Node(TokenType.TRUE)
 
         elif func_node.type is TokenType.COND:
-            #작성 - cond : 조건문 작성
+            #�옉�꽦 - cond : 議곌굔臾� �옉�꽦
             while True:
                 result = rhs1.value.next
                 condList = self.run_list(rhs1.value)
@@ -498,12 +508,12 @@ class CuteInterpreter(object):
 
         if op_code.type in \
                 [TokenType.CAR, TokenType.CDR, TokenType.CONS, TokenType.ATOM_Q,\
-                 TokenType.EQ_Q, TokenType.NULL_Q, TokenType.NOT, TokenType.COND]:#cond 추가
+                 TokenType.EQ_Q, TokenType.NULL_Q, TokenType.NOT, TokenType.COND]:#cond 異붽�
             return self.run_func(op_code)
 
         if op_code.type is TokenType.QUOTE:
             return l_node
-        #작성 run_arith : 산술 연산에 관련하여 코드 작성
+        #�옉�꽦 run_arith : �궛�닠 �뿰�궛�뿉 愿��젴�븯�뿬 肄붾뱶 �옉�꽦
         elif op_code.type in \
                 [TokenType.PLUS, TokenType.MINUS, TokenType.TIMES, TokenType.DIV,\
                  TokenType.GT, TokenType.LT, TokenType.EQ]:
@@ -519,19 +529,23 @@ class CuteInterpreter(object):
             print "expected a procedure that can be applied to arguments"
             print "Token Type is "+ op_code.value
             return None
-
-
+    
+    def insertTable(self, var, value):
+        global tokenTable
+        tokenTable[var.value] = value
+    
+        
 
 def print_node(node):
     """
-    "Evaluation 후 결과를 출력하기 위한 함수"
-    "입력은 List Node 또는 atom"
+    "Evaluation �썑 寃곌낵瑜� 異쒕젰�븯湲� �쐞�븳 �븿�닔"
+    "�엯�젰�� List Node �삉�뒗 atom"
     :type node: Node
     """
     def print_list(node):
         """
-        "List노드의 value에 대해서 출력"
-        "( 2 3 )이 입력이면 2와 3에 대해서 모두 출력함"
+        "List�끂�뱶�쓽 value�뿉 ���빐�꽌 異쒕젰"
+        "( 2 3 )�씠 �엯�젰�씠硫� 2�� 3�뿉 ���빐�꽌 紐⑤몢 異쒕젰�븿"
         :type node: Node
         """
         def print_list_val(node):
