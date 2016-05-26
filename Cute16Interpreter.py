@@ -508,7 +508,7 @@ class CuteInterpreter(object):
                 [TokenType.PLUS, TokenType.MINUS, TokenType.TIMES, TokenType.DIV,\
                  TokenType.GT, TokenType.LT, TokenType.EQ]:
             return self.run_arith(op_code)
-        
+
         elif op_code.type is TokenType.DEFINE:
             value = self.run_expr(op_code.next.next)
             var = op_code.next
